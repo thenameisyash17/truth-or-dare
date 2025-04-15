@@ -1,0 +1,2377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TS ECET Quiz</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #51555c;
+      margin: 0;
+      padding: 20px;
+      box-sizing: border-box;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+    }
+
+    #category-selection {
+      margin-bottom: 20px;
+      font-size: 16px;
+    }
+
+    #category-selection label {
+      font-weight: bold;
+      margin-right: 10px;
+    }
+
+    #category-selection select {
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: 1px solid #000000;
+    }
+
+    #quiz {
+      background-color: #b0dafc;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(181, 19, 19, 0.1);
+      padding: 20px;
+      width: 700px;
+      max-width: 200%;
+      animation: fadeIn 1s ease-in-out;
+      margin-top: 20px;
+      max-height: 700px;
+      overflow-y: auto;
+    }
+
+    .question-block {
+      margin-bottom: 40px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #000000e8;
+    }
+
+    .question {
+      font-weight: bold;
+      font-size: 18px;
+      color: #ff6c6c;
+      margin-bottom: 10px;
+    }
+
+    .options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px 40px;
+    }
+
+    .options div {
+      margin: 4px 0;
+    }
+
+    .options input[type="radio"]:checked + label {
+      color: #9aa1a9;
+    }
+
+    .options input[type="radio"]:hover + label {
+      cursor: pointer;
+      background-color: #f1f5ff;
+      border-radius: 4px;
+    }
+
+    .result {
+      margin-top: 20px;
+      font-weight: bold;
+      font-size: 18px;
+      text-align: center;
+      opacity: 0;
+      animation: fadeInResult 1s ease-in-out forwards;
+    }
+
+    .correct {
+      color: green;
+      font-weight: bold;
+    }
+
+    .incorrect {
+      color: red;
+      font-weight: bold;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin-top: 20px;
+      background-color: #050708;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #1e937d;
+    }
+
+    button:active {
+      background-color: #003f75;
+    }
+
+    .reset-btn {
+      background-color: #50b3ce;
+    }
+
+    .reset-btn:hover {
+      background-color: #218838;
+    }
+
+    .reset-btn:active {
+      background-color: #1e7e34;
+    }
+
+    @keyframes fadeIn {
+      0% {
+        opacity: 0;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
+
+    @keyframes fadeInResult {
+      0% {
+        opacity: 0;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
+
+    @media (max-width: 768px) {
+      #quiz {
+        width: 100%;
+        padding: 15px;
+      }
+
+      .options {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      .question {
+        font-size: 16px;
+      }
+
+      button {
+        width: 100%;
+        padding: 12px 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+<h1>EAMCET EXAM</h1>
+  <div id="category-selection">
+    <label for="category">Select Category: </label>
+    <select id="category" onchange="loadQuiz()">
+      <option value="physics">Physics</option>
+      <option value="chemistry">Chemistry</option>
+      <option value="maths">Maths</option>
+     
+    </select>
+  </div>
+
+  <div id="quiz"></div>
+
+  <div class="actions">
+    <button onclick="submitQuiz()">Submit</button>
+    <button class="reset-btn" onclick="resetQuiz()">Reset</button>
+  </div>
+
+  <div id="result" class="result"></div>
+
+  <script>
+  const quizData = {
+  physics: [
+  {
+    "question": "Q1. The unit of electric current is:",
+    "options": [
+      "A) Volt",
+      "B) Ampere",
+      "C) Ohm",
+      "D) Coulomb"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q2. The velocity of light in vacuum is approximately:",
+    "options": [
+      "A) 3×10^6 m/s",
+      "B) 3×10^8 m/s",
+      "C) 3×10^4 m/s",
+      "D) 3×10^9 m/s"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q3. The SI unit of force is:",
+    "options": [
+      "A) Joule",
+      "B) Newton",
+      "C) Watt",
+      "D) Pascal"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q4. What is the value of acceleration due to gravity on Earth?",
+    "options": [
+      "A) 8.9 m/s²",
+      "B) 9.8 m/s²",
+      "C) 10 m/s²",
+      "D) 9.2 m/s²"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q5. The energy possessed by an object due to its motion is called:",
+    "options": [
+      "A) Potential Energy",
+      "B) Kinetic Energy",
+      "C) Heat Energy",
+      "D) Chemical Energy"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q6. The resistance of a conductor depends on:",
+    "options": [
+      "A) Length and area of cross-section",
+      "B) Temperature and material",
+      "C) Both A and B",
+      "D) Only the temperature"
+    ],
+    "correct": 2
+  },
+  {
+    "question": "Q7. The unit of power is:",
+    "options": [
+      "A) Newton",
+      "B) Watt",
+      "C) Joule",
+      "D) Ampere"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q8. The period of a simple pendulum depends on:",
+    "options": [
+      "A) Its amplitude",
+      "B) Its mass",
+      "C) The acceleration due to gravity",
+      "D) The length of the string"
+    ],
+    "correct": 3
+  },
+  {
+    "question": "Q9. Which of the following is the correct form of Ohm's law?",
+    "options": [
+      "A) V = I/R",
+      "B) V = IR",
+      "C) V = I^2R",
+      "D) V = R/I"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q10. Which of the following is a scalar quantity?",
+    "options": [
+      "A) Velocity",
+      "B) Force",
+      "C) Temperature",
+      "D) Displacement"
+    ],
+    "correct": 2
+  },
+  {
+    "question": "Q11. The force of gravity on an object is called:",
+    "options": [
+      "A) Weight",
+      "B) Mass",
+      "C) Density",
+      "D) Volume"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q12. The total mechanical energy of a system is the sum of:",
+    "options": [
+      "A) Kinetic and Potential Energy",
+      "B) Only Kinetic Energy",
+      "C) Only Potential Energy",
+      "D) Heat and Work Energy"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q13. Which of the following is the correct unit of energy?",
+    "options": [
+      "A) Ampere",
+      "B) Volt",
+      "C) Joule",
+      "D) Newton"
+    ],
+    "correct": 2
+  },
+  {
+    "question": "Q14. The unit of capacitance is:",
+    "options": [
+      "A) Farad",
+      "B) Coulomb",
+      "C) Ohm",
+      "D) Tesla"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q15. In which type of wave, particles move in a direction parallel to the direction of propagation?",
+    "options": [
+      "A) Longitudinal waves",
+      "B) Transverse waves",
+      "C) Standing waves",
+      "D) Electromagnetic waves"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q16. The power of a lens is measured in:",
+    "options": [
+      "A) Diopters",
+      "B) Meters",
+      "C) Joules",
+      "D) Watts"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q17. The speed of sound is maximum in:",
+    "options": [
+      "A) Air",
+      "B) Water",
+      "C) Steel",
+      "D) Vacuum"
+    ],
+    "correct": 2
+  },
+  {
+    "question": "Q18. The work done in moving a charge of 1 coulomb through a potential difference of 1 volt is:",
+    "options": [
+      "A) 1 joule",
+      "B) 1 ampere",
+      "C) 1 ohm",
+      "D) 1 farad"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q19. Which of the following is the correct formula for kinetic energy?",
+    "options": [
+      "A) KE = 1/2 mv²",
+      "B) KE = mgh",
+      "C) KE = 1/2 mv³",
+      "D) KE = Fd"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q20. The gravitational force between two objects depends on:",
+    "options": [
+      "A) The mass of the objects",
+      "B) The distance between them",
+      "C) Both A and B",
+      "D) None of the above"
+    ],
+    "correct": 2
+  },
+  {
+    "question": "Q21. The refractive index of water is approximately:",
+    "options": [
+      "A) 1.33",
+      "B) 1.5",
+      "C) 1.8",
+      "D) 2"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q22. The energy stored in a capacitor is given by:",
+    "options": [
+      "A) 1/2 CV²",
+      "B) 1/2 mV²",
+      "C) 1/2 kx²",
+      "D) 1/2 I²R"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q23. A body is said to be in equilibrium if the sum of all forces acting on it is:",
+    "options": [
+      "A) Zero",
+      "B) Equal to the weight of the body",
+      "C) Greater than the body’s weight",
+      "D) None of the above"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q24. What is the principle behind a transformer?",
+    "options": [
+      "A) Ohm's law",
+      "B) Law of conservation of energy",
+      "C) Faraday's law of induction",
+      "D) Hooke's law"
+    ],
+    "correct": 2
+  },
+  {
+    "question": "Q25. The unit of magnetic flux is:",
+    "options": [
+      "A) Tesla",
+      "B) Weber",
+      "C) Ampere",
+      "D) Henry"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q26. The phenomenon of light bending around an obstacle is known as:",
+    "options": [
+      "A) Reflection",
+      "B) Refraction",
+      "C) Diffraction",
+      "D) Dispersion"
+    ],
+    "correct": 2
+  },
+  {
+    "question": "Q27. The capacitance of a parallel plate capacitor increases if the distance between the plates is:",
+    "options": [
+      "A) Increased",
+      "B) Decreased",
+      "C) Remains the same",
+      "D) Cannot be determined"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q28. The image formed by a concave mirror when the object is at infinity is:",
+    "options": [
+      "A) Virtual",
+      "B) Real and diminished",
+      "C) Real and enlarged",
+      "D) Inverted"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q29. The kinetic energy of an object is directly proportional to its:",
+    "options": [
+      "A) Mass",
+      "B) Speed",
+      "C) Velocity squared",
+      "D) Both B and C"
+    ],
+    "correct": 3
+  },
+  {
+    "question": "Q30. The unit of frequency is:",
+    "options": [
+      "A) Hertz",
+      "B) Joule",
+      "C) Watt",
+      "D) Ampere"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q31. The angular momentum of a particle moving in a circle is given by:",
+    "options": [
+      "A) mv",
+      "B) mv²",
+      "C) mvr",
+      "D) mv²r"
+    ],
+    "correct": 2
+  },
+  {
+    "question": "Q32. The refractive index of a medium is the ratio of the speed of light in vacuum to:",
+    "options": [
+      "A) The speed of light in the medium",
+      "B) The refractive index of the medium",
+      "C) The wavelength in the medium",
+      "D) The wavelength in vacuum"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q33. The potential energy of an object at a height 'h' is given by:",
+    "options": [
+      "A) mgh",
+      "B) 1/2 mv²",
+      "C) mgh²",
+      "D) mg"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q34. The work done by a constant force is given by:",
+    "options": [
+      "A) W = F × d",
+      "B) W = F × v",
+      "C) W = m × g",
+      "D) W = m × a"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q35. The unit of frequency is:",
+    "options": [
+      "A) Hertz",
+      "B) Joule",
+      "C) Watt",
+      "D) Newton"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q36. The force of attraction between two charges is given by:",
+    "options": [
+      "A) Coulomb's law",
+      "B) Newton's law",
+      "C) Hooke's law",
+      "D) Boyle's law"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q37. The magnetic field inside a long solenoid is:",
+    "options": [
+      "A) Uniform",
+      "B) Non-uniform",
+      "C) Zero",
+      "D) Varies with time"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q38. The center of mass of a system of particles is defined as the point where:",
+    "options": [
+      "A) The total mass of the system is concentrated",
+      "B) All particles are located",
+      "C) The gravitational force is maximum",
+      "D) None of the above"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q39. The potential difference between two points is defined as the work done to move a unit charge from one point to the other. This statement defines:",
+    "options": [
+      "A) Electric field",
+      "B) Electric potential",
+      "C) Electric current",
+      "D) Electric resistance"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q40. The device used to measure electric current is:",
+    "options": [
+      "A) Voltmeter",
+      "B) Ammeter",
+      "C) Galvanometer",
+      "D) Ohmmeter"
+    ],
+    "correct": 1
+  }
+
+  ],
+
+    chemistry:[
+  {
+    "question": "Q1. The atomic number of an element is the number of:",
+    "options": [
+      "A) Protons",
+      "B) Neutrons",
+      "C) Electrons",
+      "D) Nucleons"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q2. The molecular formula of methane is:",
+    "options": [
+      "A) CH₄",
+      "B) C₂H₆",
+      "C) C₄H₁₀",
+      "D) C₆H₆"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q3. Which of the following is a strong acid?",
+    "options": [
+      "A) H₂SO₄",
+      "B) HCl",
+      "C) HNO₃",
+      "D) All of the above"
+    ],
+    "correct": 3
+  },
+  {
+    "question": "Q4. The molar mass of water (H₂O) is:",
+    "options": [
+      "A) 16 g/mol",
+      "B) 18 g/mol",
+      "C) 20 g/mol",
+      "D) 22 g/mol"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q5. Which of the following is an example of a noble gas?",
+    "options": [
+      "A) Oxygen",
+      "B) Nitrogen",
+      "C) Helium",
+      "D) Chlorine"
+    ],
+    "correct": 2
+  },
+  {
+    "question": "Q6. The chemical formula of sodium hydroxide is:",
+    "options": [
+      "A) NaOH",
+      "B) Na₂O",
+      "C) NaCl",
+      "D) Na₂CO₃"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q7. Which of the following elements is a halogen?",
+    "options": [
+      "A) Oxygen",
+      "B) Chlorine",
+      "C) Nitrogen",
+      "D) Argon"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q8. The most abundant element in the Earth's crust is:",
+    "options": [
+      "A) Iron",
+      "B) Oxygen",
+      "C) Silicon",
+      "D) Aluminium"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q9. Which of the following is the common oxidation state of hydrogen?",
+    "options": [
+      "A) +1",
+      "B) -1",
+      "C) 0",
+      "D) +2"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q10. The bond formed between sodium and chlorine in sodium chloride (NaCl) is:",
+    "options": [
+      "A) Covalent",
+      "B) Ionic",
+      "C) Metallic",
+      "D) Hydrogen"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q11. Which of the following is the most common isotope of carbon?",
+    "options": [
+      "A) Carbon-12",
+      "B) Carbon-14",
+      "C) Carbon-15",
+      "D) Carbon-16"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q12. The pH of a neutral solution is:",
+    "options": [
+      "A) 0",
+      "B) 7",
+      "C) 14",
+      "D) 10"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q13. The gas released when an acid reacts with a metal is:",
+    "options": [
+      "A) Oxygen",
+      "B) Hydrogen",
+      "C) Nitrogen",
+      "D) Carbon dioxide"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q14. Which of the following is an example of an allotrope of carbon?",
+    "options": [
+      "A) Graphite",
+      "B) Diamond",
+      "C) Fullerene",
+      "D) All of the above"
+    ],
+    "correct": 3
+  },
+  {
+    "question": "Q15. The process of converting a liquid into a gas is called:",
+    "options": [
+      "A) Sublimation",
+      "B) Condensation",
+      "C) Evaporation",
+      "D) Freezing"
+    ],
+    "correct": 2
+  },
+  {
+    "question": "Q16. Which of the following is a characteristic of an acid?",
+    "options": [
+      "A) Sour taste",
+      "B) Bitter taste",
+      "C) Slippery feel",
+      "D) Turns litmus paper blue"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q17. The process of separation of a solid from a liquid by filtration is based on differences in:",
+    "options": [
+      "A) Solubility",
+      "B) Boiling point",
+      "C) Particle size",
+      "D) Density"
+    ],
+    "correct": 2
+  },
+  {
+    "question": "Q18. Which of the following is the simplest alkene?",
+    "options": [
+      "A) Methane",
+      "B) Ethene",
+      "C) Propene",
+      "D) Butene"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q19. Which of the following elements is commonly used in batteries?",
+    "options": [
+      "A) Copper",
+      "B) Zinc",
+      "C) Iron",
+      "D) Lead"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q20. Which of the following compounds is an example of an ionic compound?",
+    "options": [
+      "A) CO₂",
+      "B) NaCl",
+      "C) C₆H₆",
+      "D) CH₄"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q21. The molecular formula of ethylene glycol is:",
+    "options": [
+      "A) C₂H₆O₂",
+      "B) C₆H₆O",
+      "C) C₄H₆O",
+      "D) C₆H₁₂O₆"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q22. The chemical formula of sulfuric acid is:",
+    "options": [
+      "A) H₂SO₄",
+      "B) HCl",
+      "C) HNO₃",
+      "D) H₂CO₃"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q23. Which of the following is a metal oxide?",
+    "options": [
+      "A) Na₂O",
+      "B) H₂O",
+      "C) CO₂",
+      "D) SO₂"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q24. What is the name of the process in which a solid changes directly into a gas?",
+    "options": [
+      "A) Sublimation",
+      "B) Condensation",
+      "C) Evaporation",
+      "D) Freezing"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q25. The atomic number of an element is equal to the number of:",
+    "options": [
+      "A) Electrons",
+      "B) Neutrons",
+      "C) Protons",
+      "D) Nucleons"
+    ],
+    "correct": 2
+  },
+  {
+    "question": "Q26. Which of the following is an example of a polymer?",
+    "options": [
+      "A) Polystyrene",
+      "B) Propane",
+      "C) Methane",
+      "D) Sodium chloride"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q27. Which of the following is an example of an endothermic reaction?",
+    "options": [
+      "A) Combustion of fuels",
+      "B) Photosynthesis",
+      "C) Freezing of water",
+      "D) Condensation of steam"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q28. Which of the following is an example of a saturated hydrocarbon?",
+    "options": [
+      "A) Ethene",
+      "B) Ethyne",
+      "C) Methane",
+      "D) Benzene"
+    ],
+    "correct": 2
+  },
+  {
+    "question": "Q29. Which of the following is a physical change?",
+    "options": [
+      "A) Burning of wood",
+      "B) Dissolving sugar in water",
+      "C) Rusting of iron",
+      "D) Cooking an egg"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q30. The atomic mass unit (amu) is used to measure the mass of:",
+    "options": [
+      "A) Electrons",
+      "B) Protons",
+      "C) Neutrons",
+      "D) Atoms and molecules"
+    ],
+    "correct": 3
+  },
+  {
+    "question": "Q31. The formula for calculating the molarity of a solution is:",
+    "options": [
+      "A) M = moles of solute / volume of solution",
+      "B) M = mass of solute / volume of solution",
+      "C) M = moles of solute / mass of solution",
+      "D) M = volume of solute / volume of solution"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q32. Which of the following is an example of an alkali metal?",
+    "options": [
+      "A) Calcium",
+      "B) Sodium",
+      "C) Magnesium",
+      "D) Potassium"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q33. The process of heating a liquid to form vapors and then cooling it to get pure liquid is called:",
+    "options": [
+      "A) Filtration",
+      "B) Sublimation",
+      "C) Distillation",
+      "D) Condensation"
+    ],
+    "correct": 2
+  },
+  {
+    "question": "Q34. The main constituent of natural gas is:",
+    "options": [
+      "A) Methane",
+      "B) Ethane",
+      "C) Propane",
+      "D) Butane"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q35. The chemical bond formed by sharing of electrons between atoms is known as:",
+    "options": [
+      "A) Ionic bond",
+      "B) Covalent bond",
+      "C) Metallic bond",
+      "D) Hydrogen bond"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q36. Which of the following is used to measure the rate of chemical reactions?",
+    "options": [
+      "A) Thermometer",
+      "B) pH meter",
+      "C) Stopwatch",
+      "D) Spectrophotometer"
+    ],
+    "correct": 2
+  },
+  {
+    "question": "Q37. The main component of the Earth's atmosphere is:",
+    "options": [
+      "A) Oxygen",
+      "B) Nitrogen",
+      "C) Carbon dioxide",
+      "D) Argon"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q38. The process of oxidation involves the loss of:",
+    "options": [
+      "A) Protons",
+      "B) Neutrons",
+      "C) Electrons",
+      "D) Oxygen"
+    ],
+    "correct": 2
+  },
+  {
+    "question": "Q39. The chemical formula for the compound ammonium sulfate is:",
+    "options": [
+      "A) (NH₄)₂SO₄",
+      "B) NH₄SO₃",
+      "C) NH₃SO₄",
+      "D) NH₃SO₃"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q40. The number of molecules in one mole of a substance is known as:",
+    "options": [
+      "A) Avogadro's number",
+      "B) Planck's constant",
+      "C) Faraday's constant",
+      "D) Ideal gas constant"
+    ],
+    "correct": 0
+  }
+
+  ],
+      maths:[
+  {
+    "question": "Q1. The value of π (pi) is approximately:",
+    "options": [
+      "A) 3.14",
+      "B) 3.1416",
+      "C) 3.14159",
+      "D) 3.141"
+    ],
+    "correct": 2
+  },
+  {
+    "question": "Q2. The square root of 144 is:",
+    "options": [
+      "A) 10",
+      "B) 11",
+      "C) 12",
+      "D) 13"
+    ],
+    "correct": 2
+  },
+  {
+    "question": "Q3. The solution of the equation x + 5 = 10 is:",
+    "options": [
+      "A) x = 15",
+      "B) x = 5",
+      "C) x = 10",
+      "D) x = 0"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q4. The area of a circle is given by the formula:",
+    "options": [
+      "A) πr²",
+      "B) 2πr",
+      "C) πd",
+      "D) πr"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q5. The derivative of x² with respect to x is:",
+    "options": [
+      "A) 1",
+      "B) 2x",
+      "C) x",
+      "D) 2"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q6. The value of 2³ is:",
+    "options": [
+      "A) 6",
+      "B) 8",
+      "C) 10",
+      "D) 16"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q7. The value of the sum of the angles in a triangle is:",
+    "options": [
+      "A) 90°",
+      "B) 180°",
+      "C) 360°",
+      "D) 270°"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q8. The solution to the equation 3x = 12 is:",
+    "options": [
+      "A) x = 3",
+      "B) x = 4",
+      "C) x = 5",
+      "D) x = 6"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q9. The equation of a straight line is y = mx + b. What does 'm' represent?",
+    "options": [
+      "A) Slope",
+      "B) Intercept",
+      "C) Point",
+      "D) Distance"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q10. The volume of a cube with side length 'a' is:",
+    "options": [
+      "A) a²",
+      "B) a³",
+      "C) 2a",
+      "D) a + a"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q11. The solution to the equation x² - 9 = 0 is:",
+    "options": [
+      "A) x = 3",
+      "B) x = -3",
+      "C) x = ±3",
+      "D) x = 9"
+    ],
+    "correct": 2
+  },
+  {
+    "question": "Q12. The slope-intercept form of a linear equation is:",
+    "options": [
+      "A) y = mx + b",
+      "B) y = ax + b",
+      "C) x = my + b",
+      "D) y = bx + a"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q13. The value of log(100) is:",
+    "options": [
+      "A) 1",
+      "B) 2",
+      "C) 10",
+      "D) 100"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q14. The sum of the first 5 prime numbers is:",
+    "options": [
+      "A) 15",
+      "B) 20",
+      "C) 10",
+      "D) 28"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q15. The derivative of sin(x) with respect to x is:",
+    "options": [
+      "A) cos(x)",
+      "B) -cos(x)",
+      "C) sin(x)",
+      "D) -sin(x)"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q16. The solution to the quadratic equation x² - 4x + 3 = 0 is:",
+    "options": [
+      "A) x = 1 and x = 3",
+      "B) x = 3 and x = -1",
+      "C) x = 4 and x = -3",
+      "D) x = -1 and x = 1"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q17. The area of a triangle with base 'b' and height 'h' is:",
+    "options": [
+      "A) b × h",
+      "B) 1/2 × b × h",
+      "C) b² × h",
+      "D) b + h"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q18. The sum of the angles in a quadrilateral is:",
+    "options": [
+      "A) 180°",
+      "B) 360°",
+      "C) 270°",
+      "D) 90°"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q19. The probability of an event happening is always between:",
+    "options": [
+      "A) 0 and 1",
+      "B) -1 and 1",
+      "C) 0 and 100",
+      "D) -1 and 0"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q20. The equation of a circle with center (h, k) and radius r is:",
+    "options": [
+      "A) (x - h)² + (y - k)² = r",
+      "B) (x + h)² + (y + k)² = r²",
+      "C) (x - h)² + (y - k)² = r²",
+      "D) x² + y² = r²"
+    ],
+    "correct": 2
+  },
+  {
+    "question": "Q21. The sum of the first 10 terms of an arithmetic progression is given by:",
+    "options": [
+      "A) n(a₁ + aₙ)/2",
+      "B) n(a₁ - aₙ)/2",
+      "C) a₁ + a₂ + ... + aₙ",
+      "D) a₁ × a₂"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q22. The solution to the equation 5x + 2 = 17 is:",
+    "options": [
+      "A) x = 2",
+      "B) x = 3",
+      "C) x = 5",
+      "D) x = 7"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q23. The area of a square with side length 'a' is:",
+    "options": [
+      "A) a",
+      "B) a²",
+      "C) 2a",
+      "D) a³"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q24. The value of tan(45°) is:",
+    "options": [
+      "A) 0",
+      "B) 1",
+      "C) √2",
+      "D) ∞"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q25. The value of sin(90°) is:",
+    "options": [
+      "A) 1",
+      "B) 0",
+      "C) √2",
+      "D) 0.5"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q26. The inverse of 5 is:",
+    "options": [
+      "A) 5",
+      "B) -5",
+      "C) 1/5",
+      "D) 0"
+    ],
+    "correct": 2
+  },
+  {
+    "question": "Q27. The solution to the equation 4x + 3 = 7 is:",
+    "options": [
+      "A) x = 2",
+      "B) x = 1",
+      "C) x = 3",
+      "D) x = 4"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q28. The value of the discriminant (Δ) for the quadratic equation ax² + bx + c = 0 is:",
+    "options": [
+      "A) b² - 4ac",
+      "B) b - 4ac",
+      "C) 4ac - b²",
+      "D) 2b + c"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q29. The perimeter of a rectangle with length 'l' and width 'w' is:",
+    "options": [
+      "A) l × w",
+      "B) 2l + 2w",
+      "C) l + w",
+      "D) 2l × w"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q30. The volume of a sphere with radius 'r' is given by:",
+    "options": [
+      "A) 4/3πr³",
+      "B) πr²",
+      "C) 2/3πr³",
+      "D) 4πr²"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q31. The factorization of x² - 4 is:",
+    "options": [
+      "A) (x - 2)(x + 2)",
+      "B) (x - 1)(x + 4)",
+      "C) (x + 2)(x + 2)",
+      "D) (x - 3)(x + 1)"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q32. The sum of the first 50 natural numbers is:",
+    "options": [
+      "A) 1225",
+      "B) 1275",
+      "C) 2550",
+      "D) 50"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q33. The ratio of the circumference to the diameter of a circle is:",
+    "options": [
+      "A) 2",
+      "B) π",
+      "C) 1",
+      "D) π/2"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q34. The solution to the equation 6x - 3 = 9 is:",
+    "options": [
+      "A) x = 1",
+      "B) x = 2",
+      "C) x = 3",
+      "D) x = 4"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q35. The inverse of sin(x) is called:",
+    "options": [
+      "A) Cos(x)",
+      "B) Tan(x)",
+      "C) Arc sin(x)",
+      "D) Sec(x)"
+    ],
+    "correct": 2
+  },
+  {
+    "question": "Q36. The value of 2! (2 factorial) is:",
+    "options": [
+      "A) 2",
+      "B) 1",
+      "C) 0",
+      "D) 4"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q37. The number of sides of a regular polygon with an internal angle of 144° is:",
+    "options": [
+      "A) 5",
+      "B) 6",
+      "C) 7",
+      "D) 8"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q38. The tangent of a 45° angle is:",
+    "options": [
+      "A) 1",
+      "B) 0",
+      "C) √2",
+      "D) ∞"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q39. The expansion of (x + 2)² is:",
+    "options": [
+      "A) x² + 4",
+      "B) x² + 4x + 4",
+      "C) x² + 2x",
+      "D) x² + 2x + 2"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q40. The area of a rectangle with length 5 units and width 3 units is:",
+    "options": [
+      "A) 8",
+      "B) 15",
+      "C) 10",
+      "D) 18"
+    ],
+    "correct": 2
+  },
+  {
+    "question": "Q41. The value of sin(45°) is:",
+    "options": [
+      "A) 1/2",
+      "B) √2/2",
+      "C) 1",
+      "D) 0"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q42. The volume of a sphere with radius 'r' is:",
+    "options": [
+      "A) 4/3πr³",
+      "B) πr²h",
+      "C) 2πr²h",
+      "D) πr³"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q43. The equation of the line passing through the point (2, 3) and having a slope of 4 is:",
+    "options": [
+      "A) y - 3 = 4(x - 2)",
+      "B) y - 3 = 2(x - 2)",
+      "C) y + 3 = 4(x + 2)",
+      "D) y = 4x + 3"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q44. The perimeter of a rectangle is 30 cm, and the length is 8 cm. What is the width?",
+    "options": [
+      "A) 7 cm",
+      "B) 6 cm",
+      "C) 10 cm",
+      "D) 5 cm"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q45. The sum of the first 10 terms of an arithmetic progression (AP) with first term 5 and common difference 3 is:",
+    "options": [
+      "A) 60",
+      "B) 100",
+      "C) 150",
+      "D) 200"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q46. The value of log₁₀(1000) is:",
+    "options": [
+      "A) 1",
+      "B) 2",
+      "C) 3",
+      "D) 4"
+    ],
+    "correct": 2
+  },
+  {
+    "question": "Q47. The solution to the equation x² - 9 = 0 is:",
+    "options": [
+      "A) x = 9",
+      "B) x = 3 or x = -3",
+      "C) x = 6",
+      "D) x = ±9"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q48. The coefficient of x² in the expansion of (x + 2)³ is:",
+    "options": [
+      "A) 2",
+      "B) 1",
+      "C) 4",
+      "D) 3"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q49. The area of a triangle with base 'b' and height 'h' is given by the formula:",
+    "options": [
+      "A) bh",
+      "B) 1/2 bh",
+      "C) b + h",
+      "D) b × h"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q50. The distance between the points (1, 2) and (4, 6) is:",
+    "options": [
+      "A) 3",
+      "B) √13",
+      "C) √17",
+      "D) √25"
+    ],
+    "correct": 2
+  },
+  {
+    "question": "Q51. The sum of the first 15 terms of an arithmetic series where the first term is 5 and the common difference is 2 is:",
+    "options": [
+      "A) 90",
+      "B) 105",
+      "C) 120",
+      "D) 135"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q52. The value of tan(45°) is:",
+    "options": [
+      "A) 0",
+      "B) 1",
+      "C) √3",
+      "D) 1/√3"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q53. The sum of the roots of the equation x² - 7x + 10 = 0 is:",
+      "options": [
+        "A) 7",
+        "B) -7",
+        "C) 10",
+        "D) -10"
+      ],
+      "correct": 0
+    },
+  {
+    "question": "Q54. The value of 2 raised to the power of 4 is:",
+    "options": [
+      "A) 8",
+      "B) 16",
+      "C) 32",
+      "D) 64"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q55. The area of a circle with radius 3 cm is:",
+    "options": [
+      "A) 9π cm²",
+      "B) 6π cm²",
+      "C) 12π cm²",
+      "D) 15π cm²"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q56. The perimeter of a square with side length 5 cm is:",
+    "options": [
+      "A) 10 cm",
+      "B) 15 cm",
+      "C) 20 cm",
+      "D) 25 cm"
+    ],
+    "correct": 2
+  },
+  {
+    "question": "Q57. The equation of a circle with center at (0, 0) and radius 5 is:",
+    "options": [
+      "A) x² + y² = 5",
+      "B) x² + y² = 25",
+      "C) x² + y² = 0",
+      "D) x² + y² = 10"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q58. The solution to the equation 5x - 8 = 12 is:",
+    "options": [
+      "A) x = 4",
+      "B) x = 5",
+      "C) x = 3",
+      "D) x = 2"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q59. The expansion of (x - 2)² is:",
+    "options": [
+      "A) x² - 4x + 4",
+      "B) x² + 4x + 4",
+      "C) x² - 4x - 4",
+      "D) x² - 4x"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q60. The equation of a line parallel to y = -3x + 5 is:",
+    "options": [
+      "A) y = -3x + 4",
+      "B) y = 3x + 5",
+      "C) y = -3x + 2",
+      "D) y = 3x - 5"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q61. The value of log₂(8) is:",
+    "options": [
+      "A) 2",
+      "B) 3",
+      "C) 8",
+      "D) 1"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q62. The area of a right-angled triangle with base 4 cm and height 3 cm is:",
+    "options": [
+      "A) 12 cm²",
+      "B) 6 cm²",
+      "C) 7 cm²",
+      "D) 8 cm²"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q63. The midpoint of the line segment joining the points (1, 3) and (4, 7) is:",
+    "options": [
+      "A) (2, 5)",
+      "B) (3, 5)",
+      "C) (2, 4)",
+      "D) (3, 4)"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q64. The value of cos(0°) is:",
+    "options": [
+      "A) 1",
+      "B) 0",
+      "C) √2/2",
+      "D) 1/2"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q65. The volume of a cube with side length 4 cm is:",
+    "options": [
+      "A) 16 cm³",
+      "B) 64 cm³",
+      "C) 12 cm³",
+      "D) 32 cm³"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q66. The value of √49 is:",
+    "options": [
+      "A) 5",
+      "B) 6",
+      "C) 7",
+      "D) 8"
+    ],
+    "correct": 2
+  },
+  {
+    "question": "Q67. The solution to the equation 3x - 7 = 11 is:",
+    "options": [
+      "A) x = 6",
+      "B) x = 4",
+      "C) x = 3",
+      "D) x = 5"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q68. The perimeter of a circle with radius 7 cm is:",
+    "options": [
+      "A) 14π cm",
+      "B) 21π cm",
+      "C) 28π cm",
+      "D) 35π cm"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q69. The sum of the first 12 terms of an arithmetic progression (AP) with first term 3 and common difference 4 is:",
+    "options": [
+      "A) 120",
+      "B) 150",
+      "C) 180",
+      "D) 200"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q70. The value of sin(30°) is:",
+    "options": [
+      "A) 1/2",
+      "B) √3/2",
+      "C) 1",
+      "D) 0"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q71. The value of 4³ is:",
+    "options": [
+      "A) 16",
+      "B) 64",
+      "C) 64",
+      "D) 48"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q72. The area of a parallelogram with base 5 cm and height 3 cm is:",
+    "options": [
+      "A) 15 cm²",
+      "B) 10 cm²",
+      "C) 12 cm²",
+      "D) 18 cm²"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Q73. The difference between the squares of 8 and 5 is:",
+    "options": [
+      "A) 64",
+      "B) 39",
+      "C) 45",
+      "D) 49"
+    ],
+    "correct": 2
+  },
+  {
+    "question": "Q74. The equation of the line with slope 3 and y-intercept -2 is:",
+    "options": [
+      "A) y = 3x - 2",
+      "B) y = -3x - 2",
+      "C) y = 3x + 2",
+      "D) y = -3x + 2"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q75. The area of a rectangle with length 10 cm and width 6 cm is:",
+    "options": [
+      "A) 60 cm²",
+      "B) 50 cm²",
+      "C) 40 cm²",
+      "D) 30 cm²"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q76. The distance between the points (-3, 2) and (1, -2) is:",
+    "options": [
+      "A) √13",
+      "B) 5",
+      "C) √17",
+      "D) 4"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q77. The value of log₁₀(100) is:",
+    "options": [
+      "A) 2",
+      "B) 3",
+      "C) 1",
+      "D) 0"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q78. The solution to the equation 2x + 5 = 11 is:",
+    "options": [
+      "A) x = 3",
+      "B) x = 2",
+      "C) x = 5",
+      "D) x = 4"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q79. The area of a square with side length 7 cm is:",
+    "options": [
+      "A) 49 cm²",
+      "B) 42 cm²",
+      "C) 56 cm²",
+      "D) 40 cm²"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Q80. The value of √81 is:",
+    "options": [
+      "A) 7",
+      "B) 8",
+      "C) 9",
+      "D) 10"
+    ],
+    "correct": 2
+  }
+
+],
+     'computer-science': [
+  {
+    question: "Q1. Which of the following is a valid identifier in C?",
+    options: ["A) 2ndVariable", "B) variable_1", "C) $variable", "D) int"],
+    correct: 1
+  },
+  {
+    question: "Q2. Which of the following data types is used to store a single character in C?",
+    options: ["A) int", "B) float", "C) char", "D) double"],
+    correct: 2
+  },
+  {
+    question: "Q3. The main function in C returns an integer value. What does return 0; signify?",
+    options: ["A) Error", "B) Success", "C) Undefined behavior", "D) Memory allocation"],
+    correct: 1
+  },
+  {
+    question: "Q4. Which of the following is used to allocate memory dynamically in C?",
+    options: ["A) malloc()", "B) free()", "C) realloc()", "D) calloc()"],
+    correct: 0
+  },
+  {
+    question: "Q5. In an array, which of the following is used to access the value at a particular index?",
+    options: ["A) Array[index]", "B) index[Array]", "C) Array.index", "D) index(Array)"],
+    correct: 0
+  },
+  {
+    question: "Q6. Which of the following is used to terminate a string in C?",
+    options: ["A) \\n", "B) \\0", "C) \\t", "D) \\r"],
+    correct: 1
+  },
+  {
+    question: "Q7. Which of the following is the correct syntax for declaring a pointer in C?",
+    options: ["A) pointer var;", "B) pointer* var;", "C) pointer var;", "D) type pointer;"],
+    correct: 3
+  },
+  {
+    question: "Q8. Which of the following is the correct way to declare an array of 10 integers in C?",
+    options: ["A) int arr[10];", "B) int arr(10);", "C) arr[10] int;", "D) int arr = new int[10];"],
+    correct: 0
+  },
+  {
+    question: "Q9. Which of the following is not a valid C data type?",
+    options: ["A) int", "B) char", "C) real", "D) float"],
+    correct: 2
+  },
+  {
+    question: "Q10. Which of the following functions is used to compare two strings in C?",
+    options: ["A) compare()", "B) strcmp()", "C) stringcmp()", "D) strcompare()"],
+    correct: 1
+  },
+  {
+    question: "Q11. In C, what does the sizeof operator return?",
+    options: ["A) Size of the variable", "B) Size of the data type in bytes", "C) Size of the pointer", "D) Size of the memory allocated"],
+    correct: 1
+  },
+  {
+    question: "Q12. Which of the following is the correct syntax for a for loop in C?",
+    options: ["A) for(i=0; i<10; i++) {}", "B) for(i=0; i<10) {}", "C) for(i<10; i=0; i++) {}", "D) for(i; i<10; i++) {}"],
+    correct: 0
+  },
+  {
+    question: "Q13. Which of the following is the result of the expression 5 + 3 * 2 in C?",
+    options: ["A) 16", "B) 11", "C) 13", "D) 10"],
+    correct: 1
+  },
+  {
+    question: "Q14. What does the break statement do in C?",
+    options: ["A) Exits the loop or switch case", "B) Skips the current iteration", "C) Causes an infinite loop", "D) Stops the program execution"],
+    correct: 0
+  },
+  {
+    question: "Q15. Which of the following is a non-primitive data type in C?",
+    options: ["A) int", "B) char", "C) array", "D) float"],
+    correct: 2
+  },
+  {
+    question: "Q16. Which of the following is used for modular programming in C?",
+    options: ["A) Functions", "B) Arrays", "C) Pointers", "D) Structures"],
+    correct: 0
+  },
+  {
+    question: "Q17. What is the output of the following code?\nprintf(\"%d\", 10/4);",
+    options: ["A) 2", "B) 2.5", "C) 2.0", "D) 2.000"],
+    correct: 0
+  },
+  {
+    question: "Q18. Which of the following statements is true about a while loop?",
+    options: ["A) The loop will always execute at least once", "B) The loop will never execute", "C) The loop runs only if the condition is false", "D) The loop executes as long as the condition is true"],
+    correct: 3
+  },
+  {
+    question: "Q19. In C, a function can return:",
+    options: ["A) Only one value", "B) A pointer", "C) Multiple values", "D) All of the above"],
+    correct: 3
+  },
+  {
+    question: "Q20. Which operator is used to access a member of a structure in C?",
+    options: ["A) .", "B) ->", "C) :", "D) &"],
+    correct: 0
+  },
+  {
+    question: "Q21. Which data structure uses the \"LIFO\" principle?",
+    options: ["A) Queue", "B) Stack", "C) Linked list", "D) Tree"],
+    correct: 1
+  },
+  {
+    question: "Q22. Which of the following is the correct definition of a linked list?",
+    options: ["A) An array with random access", "B) A collection of nodes where each node points to the next node", "C) A collection of elements stored in consecutive memory locations", "D) A structure of fixed size"],
+    correct: 1
+  },
+  {
+    question: "Q23. Which of the following is true about the malloc() function?",
+    options: ["A) It initializes the allocated memory", "B) It allocates memory dynamically at runtime", "C) It is used for deallocating memory", "D) It can allocate memory for fixed size only"],
+    correct: 1
+  },
+  {
+    question: "Q24. Which sorting algorithm has the best worst-case time complexity?",
+    options: ["A) Quick sort", "B) Bubble sort", "C) Merge sort", "D) Selection sort"],
+    correct: 2
+  },
+  {
+    question: "Q25. Which algorithm is used for finding the shortest path between two nodes in a graph?",
+    options: ["A) Depth First Search", "B) Breadth First Search", "C) Dijkstra’s algorithm", "D) Kruskal’s algorithm"],
+    correct: 2
+  },
+  {
+    question: "Q26. What is the time complexity of Binary Search in the worst case?",
+    options: ["A) O(1)", "B) O(log n)", "C) O(n)", "D) O(n^2)"],
+    correct: 1
+  },
+  {
+    question: "Q27. Which of the following is the best data structure for implementing a priority queue?",
+    options: ["A) Linked List", "B) Array", "C) Heap", "D) Stack"],
+    correct: 2
+  },
+  {
+    question: "Q28. Which of the following is the correct syntax to declare a function in C?",
+    options: ["A) functionName() {}", "B) functionName(void) {}", "C) returnType functionName();", "D) functionName(returnType)"],
+    correct: 2
+  },
+  {
+    question: "Q29. In object-oriented programming (OOP), what does \"encapsulation\" refer to?",
+    options: ["A) Inheritance of classes", "B) The hiding of data and methods within a class", "C) Objects communicating with each other", "D) The ability to create objects"],
+    correct: 1
+  },
+  {
+    question: "Q30. Which of the following is not a valid type of inheritance in C++?",
+    options: ["A) Single Inheritance", "B) Multiple Inheritance", "C) Multilevel Inheritance", "D) Circular Inheritance"],
+    correct: 3
+  },
+  {
+    question: "Q31. Which of the following is the correct syntax for creating a class in C++?",
+    options: ["A) class ClassName {}", "B) class ClassName;", "C) class ClassName[] {}", "D) class ClassName() {}"],
+    correct: 0
+  },
+  {
+    question: "Q32. Which of the following is the correct syntax for a constructor in C++?",
+    options: ["A) void ClassName() {}", "B) ClassName() {}", "C) ClassName(void) {}", "D) ClassName{ } {}"],
+    correct: 1
+  },
+  {
+    question: "Q33. Which access specifier in C++ makes members of a class accessible only within that class and its derived classes?",
+    options: ["A) public", "B) private", "C) protected", "D) external"],
+    correct: 2
+  },
+  {
+    question: "Q34. In C++, which operator is used to define a scope for class members?",
+    options: ["A) ::", "B) ->", "C) .", "D) ::"],
+    correct: 0
+  },
+  {
+    question: "Q35. Which of the following is true about C++ destructors?",
+    options: ["A) Destructors are used to initialize an object", "B) A class can have more than one destructor", "C) Destructors are automatically invoked when an object goes out of scope", "D) Destructors return a value"],
+    correct: 2
+  },
+  {
+    question: "Q36. Which C++ feature allows the ability to call the same function in different ways depending on the argument types?",
+    options: ["A) Abstraction", "B) Inheritance", "C) Polymorphism", "D) Encapsulation"],
+    correct: 2
+  },
+  {
+    question: "Q37. What is the time complexity of Bubble Sort?",
+    options: ["A) O(log n)", "B) O(n)", "C) O(n^2)", "D) O(n log n)"],
+    correct: 2
+  },
+  {
+    question: "Q38. Which of the following is the correct way to declare an object in C++?",
+    options: ["A) ClassName objectName;", "B) objectName ClassName;", "C) objectName: ClassName();", "D) ClassName: objectName;"],
+    correct: 0
+  },
+  {
+    question: "Q39. Which operator is used to allocate memory dynamically in C++?",
+    options: ["A) malloc()", "B) new", "C) alloc()", "D) create()"],
+    correct: 1
+  },
+  {
+    question: "Q40. Which of the following is the time complexity of merge sort?",
+    options: ["A) O(n^2)", "B) O(n log n)", "C) O(log n)", "D) O(n)"],
+    correct: 1
+  },
+  {
+    question: "Q41. In the context of binary trees, which traversal visits the nodes in the order: Left, Root, Right?",
+    options: ["A) In-order", "B) Pre-order", "C) Post-order", "D) Level-order"],
+    correct: 0
+  },
+  {
+    question: "Q42. In C++, what does the new keyword do?",
+    options: ["A) Deletes an object", "B) Allocates memory for an object dynamically", "C) Initializes a static variable", "D) Creates a pointer to an object"],
+    correct: 1
+  },
+  {
+    question: "Q43. Which data structure is used for the implementation of recursion?",
+    options: ["A) Stack", "B) Queue", "C) Array", "D) Linked List"],
+    correct: 0
+  },
+  {
+    question: "Q44. Which of the following operations has the time complexity of O(1) in an array?",
+    options: ["A) Accessing an element by index", "B) Searching for an element", "C) Insertion", "D) Deletion"],
+    correct: 0
+  },
+  {
+    question: "Q45. What is the time complexity of Quick Sort in the average case?",
+    options: ["A) O(n^2)", "B) O(n log n)", "C) O(n)", "D) O(log n)"],
+    correct: 1
+  },
+  {
+    question: "Q46. Which of the following algorithms is used for searching an element in a sorted array?",
+    options: ["A) Linear search", "B) Binary search", "C) Hashing", "D) Bubble sort"],
+    correct: 1
+  },
+  {
+    question: "Q47. Which type of error occurs during runtime?",
+    options: ["A) Compilation error", "B) Logical error", "C) Syntax error", "D) Runtime error"],
+    correct: 3
+  },
+  {
+    question: "Q48. Which of the following is a feature of object-oriented programming?",
+    options: ["A) Functions", "B) Variables", "C) Classes and Objects", "D) Procedures"],
+    correct: 2
+  },
+  {
+    question: "Q49. What is the purpose of the break statement in C?",
+    options: ["A) To exit the current function", "B) To terminate the loop or switch statement", "C) To skip the current iteration", "D) To jump to the next function call"],
+    correct: 1
+  },
+  {
+    question: "Q50. Which of the following sorting algorithms is the most efficient in the average case for large datasets?",
+    options: ["A) Selection Sort", "B) Merge Sort", "C) Insertion Sort", "D) Bubble Sort"],
+    correct: 1
+  },  {
+    question: "Q51. What is the space complexity of Merge Sort?",
+    options: ["A) O(n)", "B) O(log n)", "C) O(n log n)", "D) O(1)"],
+    correct: 0
+  },
+  {
+    question: "Q52. Which of the following is a feature of a stack?",
+    options: ["A) LIFO (Last In, First Out)", "B) FIFO (First In, First Out)", "C) Random access", "D) Circular structure"],
+    correct: 0
+  },
+  {
+    question: "Q53. What is the maximum number of nodes in a binary tree of height h?",
+    options: ["A) 2h−1", "B) 2^{h+1} - 1", "C) h2", "D) 2^h"],
+    correct: 1
+  },
+  {
+    question: "Q54. Which of the following is used to represent a graph in memory?",
+    options: ["A) Array", "B) Linked list", "C) Matrix", "D) Tree"],
+    correct: 1
+  },
+  {
+    question: "Q55. Which of the following is the correct way to define a pointer to a function in C?",
+    options: ["A) int (ptr)()", "B) ptr() int;", "C) int ptr();", "D) ptr();"],
+    correct: 0
+  },
+  {
+    question: "Q56. In which case will a Binary Search Tree (BST) become unbalanced?",
+    options: ["A) When all elements are inserted in increasing order", "B) When elements are inserted randomly", "C) When elements are inserted in decreasing order", "D) Both A and C"],
+    correct: 0
+  },
+  {
+    question: "Q57. What is the time complexity of the best case of Quick Sort?",
+    options: ["A) O(n log n)", "B) O(n^2)", "C) O(log n)", "D) O(1)"],
+    correct: 0
+  },
+  {
+    question: "Q58. In a doubly linked list, each node contains a reference to:",
+    options: ["A) The previous node only", "B) The next node only", "C) Both previous and next nodes", "D) Neither previous nor next node"],
+    correct: 2
+  },
+  {
+    question: "Q59. Which of the following is a property of a Hash Table?",
+    options: ["A) It uses linear probing for collision resolution", "B) It provides constant time complexity for lookup on average", "C) It stores elements in sorted order", "D) It requires a large amount of space"],
+    correct: 1
+  },
+  {
+    question: "Q60. Which of the following is the best description of a 'priority queue'?",
+    options: ["A) It follows the FIFO principle", "B) It is a specialized queue where elements are dequeued in order of priority", "C) It is a stack that uses a priority ordering", "D) It has no order"],
+    correct: 1
+  },
+  {
+    question: "Q61. Which of the following is the correct representation of a Queue?",
+    options: ["A) LIFO", "B) FIFO", "C) Random", "D) Both LIFO and FIFO"],
+    correct: 1
+  },
+  {
+    question: "Q62. The time complexity of accessing an element in an unsorted array is:",
+    options: ["A) O(1)", "B) O(n)", "C) O(log n)", "D) O(n^2)"],
+    correct: 0
+  },
+  {
+    question: "Q63. The number of edges in a tree is always:",
+    options: ["A) Equal to the number of nodes", "B) One less than the number of nodes", "C) One more than the number of nodes", "D) None of the above"],
+    correct: 1
+  },
+  {
+    question: "Q64. Which of the following is used to solve the problem of stack overflow in recursion?",
+    options: ["A) Queue", "B) Hash table", "C) Tail recursion", "D) Depth-first search"],
+    correct: 2
+  },
+  {
+    question: "Q65. Which of the following is true about the Big O notation?",
+    options: ["A) It describes the worst-case scenario of an algorithm’s performance", "B) It describes the average case performance", "C) It describes the best-case scenario", "D) It describes the memory requirements of an algorithm"],
+    correct: 0
+  },
+  {
+    question: "Q66. What is the space complexity of the Quick Sort algorithm?",
+    options: ["A) O(1)", "B) O(n log n)", "C) O(log n)", "D) O(n^2)"],
+    correct: 2
+  },
+  {
+    question: "Q67. Which of the following searching algorithms has the best average-case time complexity?",
+    options: ["A) Linear search", "B) Binary search", "C) Jump search", "D) Exponential search"],
+    correct: 1
+  },
+  {
+    question: "Q68. Which of the following is true about a circular queue?",
+    options: ["A) The last element of the queue points to the first element", "B) The first element points to the last element", "C) It allows backward navigation", "D) It only allows enqueue operations"],
+    correct: 0
+  },
+  {
+    question: "Q69. The process of eliminating the recursive call stack in recursion is called:",
+    options: ["A) Tail recursion", "B) Recursion termination", "C) Recursion elimination", "D) Stack unwinding"],
+    correct: 0
+  },
+  {
+    question: "Q70. Which of the following is a feature of a doubly linked list?",
+    options: ["A) Each node contains a pointer to both the next and previous nodes", "B) It allows only forward traversal", "C) It uses a circular structure", "D) Each node contains only a data element"],
+    correct: 0
+  },
+  {
+    question: "Q71. Which of the following sorting algorithms is based on the divide-and-conquer paradigm?",
+    options: ["A) Merge Sort", "B) Bubble Sort", "C) Insertion Sort", "D) Selection Sort"],
+    correct: 0
+  },
+  {
+    question: "Q72. Which of the following data structures uses the principle of 'FIFO'?",
+    options: ["A) Stack", "B) Queue", "C) Linked list", "D) Binary tree"],
+    correct: 1
+  },
+  {
+    question: "Q73. What is the worst-case time complexity of Merge Sort?",
+    options: ["A) O(n)", "B) O(log n)", "C) O(n^2)", "D) O(n log n)"],
+    correct: 3
+  },
+  {
+    question: "Q74. The height of a tree is defined as:",
+    options: ["A) The number of edges on the longest path from the root to a leaf node", "B) The number of nodes in the longest path", "C) The number of nodes in the tree", "D) The depth of the root node"],
+    correct: 0
+  },
+  {
+    question: "Q75. Which data structure is used in the implementation of Depth-First Search (DFS)?",
+    options: ["A) Queue", "B) Stack", "C) Tree", "D) Array"],
+    correct: 1
+  },
+  {
+    question: "Q76. Which of the following is true about a binary heap?",
+    options: ["A) It is a complete binary tree", "B) It satisfies the heap property", "C) It can be used for implementing a priority queue", "D) All of the above"],
+    correct: 3
+  },
+  {
+    question: "Q77. In a binary search tree (BST), the left subtree of a node contains only nodes with keys:",
+    options: ["A) Greater than the node", "B) Less than or equal to the node", "C) Less than the node", "D) Greater than or equal to the node"],
+    correct: 2
+  },
+  {
+    question: "Q78. Which algorithm is used for finding the minimum spanning tree of a graph?",
+    options: ["A) Dijkstra’s algorithm", "B) Kruskal’s algorithm", "C) Floyd-Warshall algorithm", "D) Bellman-Ford algorithm"],
+    correct: 1
+  },
+  {
+    question: "Q79. In a graph, which of the following algorithms is used to find the shortest path from a single source to all other vertices?",
+    options: ["A) Prim’s algorithm", "B) Dijkstra’s algorithm", "C) Floyd-Warshall algorithm", "D) Bellman-Ford algorithm"],
+    correct: 1
+  },
+  {
+    question: "Q80. The process of accessing the elements of a graph in a systematic way is called:",
+    options: ["A) Graph traversal", "B) Graph searching", "C) Graph indexing", "D) Graph sorting"],
+    correct: 0
+  },
+  {
+    question: "Q81. Which of the following is not a feature of Object-Oriented Programming (OOP)?",
+    options: ["A) Abstraction", "B) Encapsulation", "C) Inheritance", "D) Compilation"],
+    correct: 3
+  },
+  {
+    question: "Q82. Which operator is used for type casting in C?",
+    options: ["A) :", "B) (type)", "C) ->", "D) []"],
+    correct: 1
+  },
+  {
+    question: "Q83. Which of the following sorting algorithms is considered stable?",
+    options: ["A) Merge Sort", "B) Quick Sort", "C) Heap Sort", "D) Selection Sort"],
+    correct: 0
+  },
+  {
+    question: "Q84. What does a deadlock in operating systems refer to?",
+    options: ["A) A process that is stuck in an infinite loop", "B) A situation where two or more processes are unable to proceed because each is waiting for the other to release resources", "C) A process that runs forever", "D) A process that completes all operations successfully"],
+    correct: 1
+  },
+  {
+    question: "Q85. Which of the following is a feature of a non-blocking I/O operation?",
+    options: ["A) It waits for data to be ready before proceeding", "B) It allows the process to continue execution without waiting for the I/O operation to complete", "C) It locks the resources for other processes", "D) It is slower than blocking I/O operations"],
+    correct: 1
+  },
+  {
+    question: "Q86. What is the function of a system call in an operating system?",
+    options: ["A) To request services from the kernel", "B) To create a new process", "C) To allocate memory", "D) To perform user-level tasks"],
+    correct: 0
+  },
+  {
+    question: "Q87. The page replacement algorithm that replaces the page that will not be used for the longest time in the future is called:",
+    options: ["A) FIFO", "B) LRU", "C) OPT", "D) LFU"],
+    correct: 2
+  },
+  {
+    question: "Q88. In a database, which of the following operations is used to remove duplicates from a table?",
+    options: ["A) SELECT DISTINCT", "B) DELETE", "C) DROP", "D) UPDATE"],
+    correct: 0
+  },
+  {
+    question: "Q89. Which of the following is not a relational operator in SQL?",
+    options: ["A) =", "B) <", "C) AND", "D) >="],
+    correct: 2
+  },
+  {
+    question: "Q90. Which of the following is true about a primary key in a database?",
+    options: ["A) It is used to uniquely identify records in a table", "B) It can contain null values", "C) It can be duplicated in the table", "D) It does not need to be indexed"],
+    correct: 0
+  },
+  {
+    question: "Q91. In SQL, which clause is used to sort the result set in ascending or descending order?",
+    options: ["A) GROUP BY", "B) ORDER BY", "C) WHERE", "D) HAVING"],
+    correct: 1
+  },
+  {
+    question: "Q92. Which of the following is an example of a non-relational database?",
+    options: ["A) MySQL", "B) MongoDB", "C) Oracle", "D) PostgreSQL"],
+    correct: 1
+  },
+  {
+    question: "Q93. Which algorithm is used to handle deadlocks in a database system?",
+    options: ["A) Two-phase locking protocol", "B) Wait-for graph", "C) Resource allocation graph", "D) Both B and C"],
+    correct: 1
+  },
+  {
+    question: "Q94. Which of the following languages is primarily used for web development?",
+    options: ["A) Python", "B) JavaScript", "C) Java", "D) C#"],
+    correct: 1
+  },
+  {
+    question: "Q95. Which of the following protocols is used for secure communication over the internet?",
+    options: ["A) HTTP", "B) FTP", "C) HTTPS", "D) SMTP"],
+    correct: 2
+  },
+  {
+    question: "Q96. Which of the following is a method of data communication in a computer network?",
+    options: ["A) Unicast", "B) Broadcast", "C) Multicast", "D) All of the above"],
+    correct: 3
+  },
+  {
+    question: "Q97. What is the main function of a router in a network?",
+    options: ["A) To direct traffic between different networks", "B) To store data", "C) To encrypt data", "D) To establish a connection between nodes"],
+    correct: 0
+  },
+  {
+    question: "Q98. Which of the following is a valid IPv4 address?",
+    options: ["A) 192.300.1.1", "B) 256.1.1.1", "C) 192.168.1.1", "D) 128.1.1.999"],
+    correct: 2
+  },
+  {
+    question: "Q99. Which of the following encryption algorithms is widely used for securing data in transit?",
+    options: ["A) RSA", "B) DES", "C) AES", "D) Both A and C"],
+    correct: 0
+  },
+  {
+    question: "Q100. In computer networking, what is the maximum data transmission rate of the standard Ethernet cable?",
+    options: ["A) 1 Mbps", "B) 10 Mbps", "C) 100 Mbps", "D) 1 Gbps"],
+    correct: 3
+  }
+]
+
+
+    };
+
+    function loadQuiz() {
+      const category = document.getElementById("category").value;
+      const quizContainer = document.getElementById("quiz");
+      quizContainer.innerHTML = ""; // Clear previous quiz
+
+      const selectedQuizData = quizData[category] || [];
+      if (selectedQuizData.length === 0) {
+        quizContainer.innerHTML = "<p>No questions available for this category.</p>";
+        return;
+      }
+
+      // Display all questions
+      selectedQuizData.forEach((q, i) => {
+        const qBlock = document.createElement("div");
+        qBlock.className = "question-block";
+        qBlock.innerHTML = `
+          <div class="question">${q.question}</div>
+          <div class="options">
+            ${q.options.map((opt, idx) => `
+              <div>
+                <label>
+                  <input type="radio" name="q${i}" value="${idx}"> ${opt}
+                </label>
+              </div>
+            `).join("")}
+          </div>
+        `;
+        quizContainer.appendChild(qBlock);
+      });
+    }
+
+    function submitQuiz() {
+      let score = 0;
+      const category = document.getElementById("category").value;
+      const selectedQuizData = quizData[category] || [];
+
+      selectedQuizData.forEach((q, i) => {
+        const selected = document.querySelector(`input[name="q${i}"]:checked`);
+        const options = document.querySelectorAll(`input[name="q${i}"]`);
+
+        if (selected && parseInt(selected.value) === q.correct) {
+          score++;
+          options[q.correct].parentElement.classList.add("correct");
+        } else {
+          options[q.correct].parentElement.classList.add("correct");
+          if (selected) {
+            selected.parentElement.classList.add("incorrect");
+          }
+        }
+      });
+      document.getElementById("result").textContent = `You got ${score} out of ${selectedQuizData.length} correct.`;
+    }
+
+    function resetQuiz() {
+      document.getElementById("category").value = 'physics'; // Reset to default category
+      loadQuiz();
+      document.getElementById("result").textContent = '';
+    }
+
+    // Initialize quiz with default category (Physics)
+    loadQuiz();
+  </script>
+
+</body>
+</html>
